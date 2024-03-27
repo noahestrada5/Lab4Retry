@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset=utf-8 />
+
+<title>Where's the Public Land?</title>
+
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+ body {
+    margin:0;
+    padding:0;
+    font-family:
+    sans-serif;
+    }
+
+  h1 {
+    position: absolute;
+    left: 50px;
+    top: 10px;
+    padding: 8px 2%;
+    margin: 0;
+    background: rgba(35, 29, 6, 0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 3px;
+    color: whitesmoke;
+    font-size: 2.2em;
+    z-index: 800;
+    }
+
+  #map {
+    position:absolute;
+    top:0;
+    bottom:0;
+    width: 100%;
+    height: 100%;
+   }
+
+  
+
+   section {
+			position: absolute;
+			bottom: 0;
+      opacity: 0.7;
+			left: 10px;
+			width: 280px;
+			margin: 20px auto;
+			padding: 0 15px;
+			background: rgba(256, 256, 256);
+			border: 1px solid grey;
+			border-radius: 3px;
+			z-index: 800;
+		}   
+    #legend {
+  position: relative;
+  margin: 20px 0;
+}
+#legend-large, #legend-small {
+  border: 2px solid grey;
+  border-radius: 50%;
+  background: whitesmoke;
+  position: absolute;
+}
+#legend-large-label, #legend-small-label {
+  position: absolute;
+}
+#legend hr.small, #legend hr.large {
+  width: 83px;
+  position: absolute;
+  top: -8px;
+  left: 66px;
+}
+     
+
+        
+        
+        .info {
+  z-index: 1000;
+position: absolute;
+right: 20px;
+top: 20px;
+padding: 6px 8px;
+font: 14px Arial, Helvetica, sans-serif;
+text-align: right;
+background: white;
+background: rgba(255, 255, 255, 0.8);
+box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+border-radius: 5px;
+}
+.info h1 {
+font-size: 16px;
+margin: 0 0 5px;
+color: #777777;
+}
+</style>
+
+
+</head>
+<body>
+  
+
+
+<div id='map'></div>
+<h1>Public Land Percentage by State</h1>
+
+<section>
+
+  <p> This map is for a lab project in my web mapping course at Appalachian State University.</p>
+    <p>This map highlights the percentages of land in each state that belongs to the public. It is  important to look at the differences between each state in regards to public vs. private land for a number of reasons.  </p>
+  <p>Map and text authored by Noah Estrada.</p>
+  <div id="legend" style="height: 170px;">
+    <div id="legend-large" style="width: 170px; height: 170px;"></div>
+    <div id="legend-small" style="width: 85px; height: 85px; top: 85.1206px; left: 42.5603px;"></div>
+    <hr class="large"><div id="legend-large-label" style="left: 200.241px; top: -8px;">~97%</div>
+    <hr class="small" style="top: 77.1206px;"><div id="legend-small-label" style="top: 77.1206px; left: 200.241px;">~35%</div>
+</div>
+
+
+</section>
+
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+
+
+<script>
+
+console.log("hello world!");
+
+var map = L.map('map', {
+        center: [39.5, -95.3],
+        zoom: 5
+    });
+
+    var USGS_USImageryTopo = L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/{z}/{y}/{x}', {
+	maxZoom: 20,
+	attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>'
+}).addTo(map);
+
+
+
+states = L.geoJson.ajax("assets/data.geojson",{
+    pointToLayer: function (feature, x){
+      return L.circleMarker(x, {
+        color: '#ff7900',
+        opacity: 1,
+        weight: 2,
+        fillColor: '#ff7900',
+        fillOpacity: .6,
+        radius: calcRadius(feature.properties.estimate)
+      }) }});
+	
+var minValue = 1;
+var minRadius = 7;
+
+function calcRadius(val) {
+        return 1.00 * Math.pow(val/minValue,0.5) * minRadius;
+        }
+
+L.control.scale({position: 'bottomleft'}).addTo(map);
+
+states.addTo(map);
+
+
+
+states = L.geoJson.ajax("assets/data.geojson",{
+attribution: 'Data: US Bureau of the Census, Statistical Abstract of the United States, Map: Noah Estrada',
+onEachFeature: function (feature, layer) {
+         layer.bindPopup(feature.properties.name + "<BR>" + feature.properties.estimate);
+     },
+
+pointToLayer: function (feature, x){
+return L.circleMarker(x, {
+color: '#97E37C',
+opacity: 1,
+weight: 2,
+fillColor: '#97E37C',
+fillOpacity: .6,
+radius: calcRadius(feature.properties.estimate)
+}).on({
+mouseover: function(e){
+this.setStyle({color: 'blue',fillColor: 'blue'});
+},
+mouseout: function(e){
+this.setStyle({color:'#97E37C', fillColor: '#97E37C'});
+} })},});
+var minValue = 1;
+var minRadius = 8;
+function calcRadius(val) {
+return 1.00 * Math.pow(val/minValue,.5) * minRadius;
+}
+states.addTo(map);
+//copying started here
+
+
+</script>
+
+
+</body>
+</html>
